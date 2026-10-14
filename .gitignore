@@ -1,0 +1,25 @@
+# --- personal originals: never publish ---
+pics/
+private/
+originals/
+*.heic
+*.HEIC
+
+# --- os / editor ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- node / astro build output ---
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+
+# --- internal notes and snapshots, kept local only ---
+INTERNAL_INDEX.md
+lessons/
+research/
+internal/
+assets/ASSETS.md
