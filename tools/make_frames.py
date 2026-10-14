@@ -35,6 +35,9 @@ def main() -> int:
     ap.add_argument("--frames", type=int, default=150)
     ap.add_argument("--quality", type=int, default=72)
     ap.add_argument("--fmt", default="avif", choices=("avif", "webp"))
+    ap.add_argument("--start", type=float, default=0.0, help="start second")
+    ap.add_argument("--duration", type=float, default=0.0, help="seconds to use (0 = to the end)")
+    ap.add_argument("--fps", type=float, default=0.0, help="fixed sample rate; overrides --frames")
     ap.add_argument("--pre", default="", help="ffmpeg filter run before scaling, e.g. hqdn3d=3:3:4:4")
     args = ap.parse_args()
 
@@ -42,14 +45,15 @@ def main() -> int:
     out_w = args.width - (args.width % 2)
     out_h = round(h * out_w / w)
     out_h -= out_h % 2
-    fps = args.frames / dur
+    dur_eff = args.duration if args.duration > 0 else max(0.1, dur - args.start)
+    fps = args.fps if args.fps > 0 else args.frames / dur_eff
     vf = ((args.pre + ",") if args.pre else "") + f"fps={fps:.5f},scale={out_w}:{out_h}:flags=lanczos"
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for old in list(out.glob("f*.webp")) + list(out.glob("f*.avif")):
         old.unlink()
 
-    cmd = ["ffmpeg", "-v", "error", "-i", args.src, "-vf", vf,
+    cmd = ["ffmpeg", "-v", "error", "-ss", str(args.start), "-t", f"{dur_eff:.3f}", "-i", args.src, "-vf", vf,
            "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     frame_bytes = out_w * out_h * 3
@@ -69,7 +73,7 @@ def main() -> int:
         total += p.stat().st_size
     proc.wait()
     manifest = {"frames": n, "width": out_w, "height": out_h, "ext": args.fmt,
-                "bytes": total, "source_seconds": round(dur, 3)}
+                "bytes": total, "source_seconds": round(dur_eff, 3), "fps": round(fps, 3)}
     (out / "manifest.json").write_text(json.dumps(manifest))
     print(f"{args.src}: {n} frames {out_w}x{out_h} total {total/1e6:.2f} MB avg {total/max(n,1)/1e3:.0f} KB")
     return 0

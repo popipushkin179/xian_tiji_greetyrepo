@@ -1,0 +1,23 @@
+---
+import { u } from '../lib/paths';
+
+interface Props {
+  ids: string[];
+  reverse?: boolean;
+}
+const { ids, reverse = false } = Astro.props;
+---
+
+<div class="parade" data-sticker aria-hidden="true">
+  <div class={`track${reverse ? ' rev' : ''}`}>
+    {
+      [0, 1].map((n) => (
+        <div class="group">
+          {ids.map((id) => (
+            <img src={u(`media/stickers/${id}.webp`)} alt="" loading="lazy" decoding="async" draggable="false" />
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>

@@ -1,0 +1,21 @@
+---
+import { u } from '../lib/paths';
+import type { Sticker } from '../stickers';
+
+interface Props {
+  list: Sticker[];
+}
+const { list } = Astro.props;
+---
+
+{
+  list.map((c) => (
+    <div
+      class={`cat${c.card ? '' : ' cut'}${c.hideOnPhone ? ' mhide' : ''}`}
+      data-sticker
+      style={`--w:${c.w}px; --wm:${c.wm ?? 96}px; --rot:${c.rot}deg; ${c.pos}`}
+    >
+      <img src={u(`media/stickers/${c.id}.webp`)} alt="" loading="lazy" decoding="async" draggable="false" />
+    </div>
+  ))
+}

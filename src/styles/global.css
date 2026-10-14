@@ -94,12 +94,22 @@ html.no-film #cinema { display: none; }
   inset: -12%;
   width: 124%;
   height: 124%;
-  filter: blur(26px) saturate(1.35) brightness(0.78);
+  opacity: 0.8; /* darkening by opacity over the plum stage: compositor-cheap, unlike a brightness filter */
   display: none;
 }
-.scene[data-mode='frame'] .amb { display: block; }
+.scene[data-mode='frame'] .amb, .scene[data-mode='band'] .amb { display: block; }
 .scene .frame { position: absolute; inset: 0; overflow: hidden; }
-.scene .frame canvas { display: block; width: 100%; height: 100%; filter: saturate(1.22) contrast(1.05) brightness(1.03); }
+.scene .frame canvas { display: block; width: 100%; height: 100%; } /* the colour grade is baked into the frames at encode time */
+.scene[data-mode='band'] .frame {
+  inset: auto;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  transform: translateY(-50%);
+  box-shadow: 0 30px 90px rgba(20, 8, 30, 0.5);
+}
 .scene[data-mode='frame'] .frame {
   inset: auto;
   left: 50%;
@@ -115,10 +125,10 @@ html.no-film #cinema { display: none; }
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* normal blending on purpose: soft-light forces the compositor to read the backdrop every frame */
   background:
-    linear-gradient(to top, rgba(255, 150, 195, 0.22), transparent 42%),
-    radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(58, 20, 52, 0.38));
-  mix-blend-mode: soft-light;
+    linear-gradient(to top, rgba(255, 130, 185, 0.16), transparent 42%),
+    radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(58, 20, 52, 0.3));
 }
 .lines {
   position: absolute;
@@ -184,9 +194,7 @@ html.no-film #cinema { display: none; }
   gap: 8px;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(255, 247, 251, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 247, 251, 0.9);
   box-shadow: 0 6px 24px rgba(80, 30, 70, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.6);
 }
 .dock button {
@@ -216,9 +224,7 @@ html.no-film #cinema { display: none; }
   padding: 0.5rem 1rem;
   white-space: nowrap;
   border-radius: 999px;
-  background: rgba(255, 247, 251, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 247, 251, 0.92);
   color: var(--berry);
   font-family: var(--font-script);
   font-size: 0.9rem;
@@ -239,7 +245,6 @@ html.no-film #cinema { display: none; }
   background-size: cover;
   background-position: center;
   opacity: 0.075;
-  filter: blur(1.5px) saturate(1.2);
   pointer-events: none;
 }
 #scrapbook::after {
@@ -320,8 +325,9 @@ h2 { font-size: clamp(1.9rem, 5.4vw, 3.4rem); }
 #wish.on { opacity: 1; transform: none; }
 
 /* stickers (cat gifs) */
-.cat { position: absolute; z-index: 5; width: var(--w, 130px); touch-action: none; user-select: none; -webkit-user-drag: none; cursor: grab; filter: drop-shadow(0 8px 14px rgba(80, 30, 70, 0.25)); transition: opacity 400ms var(--ease), visibility 0s, transform 300ms var(--ease); }
-.cat img { display: block; width: 100%; height: auto; border-radius: 18px; border: 5px solid #fff; background: #fff; pointer-events: none; }
+.cat { position: absolute; z-index: 5; width: var(--w, 130px); touch-action: none; user-select: none; -webkit-user-drag: none; cursor: grab; transition: opacity 400ms var(--ease), visibility 0s, transform 300ms var(--ease); }
+.cat img { display: block; width: 100%; height: auto; border-radius: 18px; border: 5px solid #fff; background: #fff; pointer-events: none; box-shadow: 0 8px 16px rgba(80, 30, 70, 0.22); }
+.cat.cut img { border: 0; border-radius: 0; background: none; box-shadow: none; }
 .cat.drag { cursor: grabbing; transition: none; }
 .cat.pop { animation: pop 520ms var(--ease); }
 @keyframes pop { 30% { transform: translate(var(--tx, 0), var(--ty, 0)) rotate(var(--rot, 0deg)) scale(1.18); } 100% { transform: translate(var(--tx, 0), var(--ty, 0)) rotate(var(--rot, 0deg)) scale(1); } }
@@ -345,7 +351,8 @@ dialog.lb button { position: absolute; top: -14px; right: -14px; width: 36px; he
   .board { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem 1rem; }
   .pola.a, .pola.b, .pola.c, .pola.d { grid-column: auto; margin-top: 0; }
   .pola.b, .pola.d { margin-top: 1.6rem; }
-  .cat { --w: 96px !important; }
+  .cat { width: var(--wm, 96px); }
+  .cat.mhide { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -354,3 +361,14 @@ dialog.lb button { position: absolute; top: -14px; right: -14px; width: 36px; he
   .pola, .btn, .dock button { transition: none; }
   .line { transition: none; }
 }
+
+/* parades: dancing rows between sections */
+.parade { position: relative; z-index: 2; overflow: hidden; padding: 0.6rem 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); transition: opacity 400ms var(--ease); }
+.parade .track { display: flex; width: max-content; animation: march 44s linear infinite; will-change: transform; }
+.parade .track.rev { animation-direction: reverse; }
+.parade .group { display: flex; align-items: flex-end; gap: 2.2rem; padding-right: 2.2rem; }
+.parade img { flex: none; height: 104px; width: auto; }
+@keyframes march { to { transform: translateX(-50%); } }
+html[data-stickers='off'] .parade { opacity: 0; visibility: hidden; }
+@media (max-width: 760px) { .parade img { height: 78px; } .parade .group { gap: 1.4rem; padding-right: 1.4rem; } }
+@media (prefers-reduced-motion: reduce) { .parade .track { animation: none; width: auto; justify-content: center; } .parade .group:nth-child(2) { display: none; } }

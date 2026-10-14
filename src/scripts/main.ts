@@ -19,7 +19,7 @@ const lowMem = window.innerWidth < 700 || ((navigator as unknown as { deviceMemo
 
 let petals: PetalField | null = null;
 try {
-  petals = new PetalField(document.getElementById('petals') as HTMLCanvasElement, { count: lowMem ? 150 : 340, maxDpr: 1.5 });
+  petals = new PetalField(document.getElementById('petals') as HTMLCanvasElement, { count: lowMem ? 150 : 340, maxDpr: 1 });
   if (!reduced) petals.start();
   window.addEventListener('resize', () => petals?.resize());
 } catch (err) {

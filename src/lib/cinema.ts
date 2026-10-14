@@ -11,12 +11,14 @@ interface SceneDef {
   start: number;
   end: number;
   gate: number;
+  /** landscape clip that must not be cropped on a portrait phone: shown letterboxed over a soft ambient fill */
+  contain?: boolean;
 }
 
 // Progress windows over the 0..1 scroll of #cinema. Scenes overlap so they crossfade.
 const DEFS: SceneDef[] = [
   { key: 'road', start: 0.0, end: 0.37, gate: 24 },
-  { key: 'wild', start: 0.33, end: 0.66, gate: 8 },
+  { key: 'hib', start: 0.33, end: 0.66, gate: 8, contain: true },
   { key: 'bloom', start: 0.62, end: 0.91, gate: 8 },
 ];
 const FADE = 0.045;
@@ -32,6 +34,7 @@ class Scene {
   frame: HTMLElement;
   main: HTMLCanvasElement;
   amb: HTMLCanvasElement | null;
+  tiny: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D;
   actx: CanvasRenderingContext2D | null;
   fit: 'tall' | 'wide';
@@ -40,7 +43,7 @@ class Scene {
   drawnKey = '';
   cssW = 0;
   cssH = 0;
-  mode: 'frame' | 'cover' = 'cover';
+  mode: 'frame' | 'band' | 'cover' = 'cover';
 
   constructor(public def: SceneDef, root: HTMLElement, radius: number, stride: number) {
     this.el = root.querySelector(`[data-scene="${def.key}"]`) as HTMLElement;
@@ -57,7 +60,7 @@ class Scene {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const landscape = vw / vh > 0.78;
-    this.mode = this.fit === 'tall' && landscape ? 'frame' : 'cover';
+    this.mode = this.fit === 'tall' && landscape ? 'frame' : this.def.contain && !landscape ? 'band' : 'cover';
     this.el.dataset.mode = this.mode;
     const r = this.frame.getBoundingClientRect();
     this.cssW = r.width;
@@ -69,9 +72,23 @@ class Scene {
       this.main.width = w;
       this.main.height = h;
     }
-    if (this.amb && this.amb.width !== 48) {
-      this.amb.width = 48;
-      this.amb.height = 84;
+    if (this.amb) {
+      // The ambient fill is drawn tiny, then smoothed up to a medium canvas inside canvas (guaranteed bilinear),
+      // so the final CSS stretch is small. A bare CSS upscale of a tiny canvas shows mosaic blocks.
+      // Both share the viewport's aspect ratio, or the upscale smears in one direction.
+      const aw = 320;
+      const ah = Math.max(120, Math.round((aw * vh) / vw));
+      if (this.amb.width !== aw || this.amb.height !== ah) {
+        this.amb.width = aw;
+        this.amb.height = ah;
+      }
+      if (!this.tiny) this.tiny = document.createElement('canvas');
+      const tw = 40;
+      const th = Math.max(16, Math.round((tw * vh) / vw));
+      if (this.tiny.width !== tw || this.tiny.height !== th) {
+        this.tiny.width = tw;
+        this.tiny.height = th;
+      }
     }
     this.drawnKey = '';
   }
@@ -96,7 +113,14 @@ class Scene {
       const B = this.seq.nearest(i1);
       if (B && B.index === i1) drawCover(this.ctx, B.bm, cw, ch, a);
     }
-    if (this.actx && this.mode === 'frame') drawCover(this.actx, A.bm, this.amb!.width, this.amb!.height, 1);
+    if (this.actx && this.tiny && this.mode !== 'cover') {
+      const tctx = this.tiny.getContext('2d')!;
+      tctx.imageSmoothingQuality = 'high';
+      drawCover(tctx, A.bm, this.tiny.width, this.tiny.height, 1);
+      this.actx.imageSmoothingEnabled = true;
+      this.actx.imageSmoothingQuality = 'high';
+      this.actx.drawImage(this.tiny, 0, 0, this.amb!.width, this.amb!.height);
+    }
   }
 }
 
