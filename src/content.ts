@@ -38,8 +38,8 @@ export const message = {
   headingHighlight: 'birthday', // second word, shown with the pink highlight
   paragraphs: [
     'I hope today feels as soft as that road looked, and as bright as the little buds that just opened.',
-    'I hope someone makes you laugh until it hurts, and someone else brings you the biggest slice. Thank you for being so easy to be silly with.',
-    'Here is one small, slightly ridiculous page, built just for you. Poke around: double-tap anywhere, pet the cats, blow out the candles.',
+    "Live light and live heavy. An old man can pile up a whole worrisome world of advice, and the world is changing, and there's too much to catch up on, but all of that gets shoved aside. So sometimes, let's enjoy ridiculous pages, peaceful growth, and the ability to be clumsily human. Be proper, be light, be without regrets, be clumsy. Make wonderful human mistakes and grow into your potential self, from missing exams to popping pimples.",
+    "Live light when it's needed, live heavy when it's needed. Float away like petals for freedom, or get yourself biking down a long, strenuous, strong road with cherry blossoms on the side. We live and bloom for much longer than flowers do. Remember that.",
   ],
   signoff: 'with love', // small line under the message
 };
@@ -80,11 +80,9 @@ export const cake = {
   privacy: 'The microphone is only listened to on your device while you blow. Nothing is recorded or sent anywhere.',
 };
 
-/* THE FOOTER */
-export const footer = [
-  'Made with love, a little code, and way too many petals.',
-  'Video clips from Pexels, used under the Pexels licence. Fonts: Zen Maru Gothic and Klee One, SIL Open Font Licence.',
-];
+/* THE FOOTER. Left empty on purpose; add lines here if you ever want small print at the bottom.
+   (Credits for the clips, fonts and stickers live in ATTRIBUTIONS.md in the repo.) */
+export const footer: string[] = [];
 
 /* The little pill that appears for a few seconds right after the page opens. */
 export const hints = {
