@@ -1,0 +1,176 @@
+---
+import Base from '../layouts/Base.astro';
+import { u } from '../lib/paths';
+import { site, filmLines, message, board, video, quote, cake, footer, hints } from '../content';
+
+const HEART = 'M12 21.4l-1.5-1.4C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.5L12 21.4z';
+const SPARK = 'M12 1.5c.6 5.6 4.9 9.9 10.5 10.5C16.9 12.6 12.6 16.9 12 22.5 11.4 16.9 7.1 12.6 1.5 12 7.1 11.4 11.4 7.1 12 1.5z';
+
+
+const photos = [
+  { cls: 'a', id: 'p1', w: 780, h: 890, alt: 'Mirror selfie in a cream jacket', cap: board.captions.p1 },
+  { cls: 'b', id: 'p5', w: 1100, h: 1467, alt: 'Close-up portrait with rosy eyeshadow', cap: board.captions.p5 },
+  { cls: 'c', id: 'p4', w: 1100, h: 1467, alt: 'Mirror selfie in a clothing store', cap: board.captions.p4 },
+  { cls: 'd', id: 'p2', w: 972, h: 954, alt: 'Portrait with glasses, a pink bow and star stickers', cap: board.captions.p2 },
+];
+
+const cat = (id: string, w: number, rot: number, pos: string) => ({ id, w, rot, pos });
+const CATS = {
+  board: cat('cat-silly', 116, 5, 'right: 3%; bottom: 1rem;'),
+  video: cat('cat-stare', 112, 6, 'right: 3%; top: 5.2rem;'),
+  quote: cat('cat-orange', 150, -7, 'left: 4%; top: 2.2rem;'),
+  cake: cat('cat-dance', 150, -5, 'right: 3%; top: 2.2rem;'),
+};
+---
+
+<Base title={site.title} description={site.description}>
+  <div class="preloader" id="preloader" role="status" aria-live="polite">
+    <div class="inner">
+      <svg viewBox="0 0 24 24" class="beat" aria-hidden="true">
+        <defs>
+          <clipPath id="pc"><rect id="pcr" x="0" y="24" width="24" height="24"></rect></clipPath>
+        </defs>
+        <path class="fill" d={HEART} clip-path="url(#pc)"></path>
+        <path class="rim" d={HEART}></path>
+      </svg>
+      <p>gathering something soft <span class="pct" id="pct">0</span>%</p>
+    </div>
+  </div>
+
+  <div class="dock" role="group" aria-label="Toggle effects">
+    <button type="button" data-toggle="petals" aria-pressed="true" aria-label="Falling petals" title="falling petals">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22c-1-4-6-6-6-11 0-3 2-5 4-5 1 0 1.6.5 2 1 .4-.5 1-1 2-1 2 0 4 2 4 5 0 5-5 7-6 11z"></path></svg>
+    </button>
+    <button type="button" data-toggle="hearts" aria-pressed="true" aria-label="Heart circles and sparkles" title="heart circles">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d={HEART}></path></svg>
+    </button>
+    <button type="button" data-toggle="stickers" aria-pressed="true" aria-label="Cat stickers" title="cat stickers">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 3l4.2 3.1C9.4 5.7 10.7 5.5 12 5.5s2.6.2 3.8.6L20 3v8.3c.7 1.1 1 2.3 1 3.7 0 4-4 7-9 7s-9-3-9-7c0-1.4.3-2.6 1-3.7V3zm5 9.3a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6zm6 0a1.3 1.3 0 100 2.6 1.3 1.3 0 000-2.6z"></path></svg>
+    </button>
+  </div>
+
+  <div class="hint" id="hint" aria-hidden="true" data-desktop={hints.desktop} data-phone={hints.phone}></div>
+
+  <main>
+    <!-- ACT I: the cinema. Three real 4K clips, scrubbed by scroll as frame sequences. -->
+    <section id="cinema" aria-label="A scroll story">
+      <div class="stage">
+        <div class="bed"></div>
+        <div class="scene" data-scene="road" data-fit="tall"><canvas class="amb"></canvas><div class="frame"><canvas class="main"></canvas></div></div>
+        <div class="scene" data-scene="wild" data-fit="tall"><canvas class="amb"></canvas><div class="frame"><canvas class="main"></canvas></div></div>
+        <div class="scene" data-scene="bloom" data-fit="wide"><div class="frame"><canvas class="main"></canvas></div></div>
+        <div class="grade"></div>
+        <div class="lines">
+          {filmLines.map((l) => <p class={`line${l.big ? ' big' : ''}`} data-in={l.from} data-out={l.to}>{l.text}</p>)}
+        </div>
+        <div class="wash"></div>
+        <div class="rail" aria-hidden="true"><div class="bar"></div></div>
+        <div class="cue" aria-hidden="true">
+          <span>scroll</span>
+          <svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACT II: the scrapbook -->
+    <div id="scrapbook" style={`--ambient-bg: url(${u('frames/bloom/f0070.avif')})`}>
+      <section class="sec hello">
+        <figure class="hero-photo reveal">
+          <picture>
+            <source srcset={u('media/people/p3.avif')} type="image/avif" />
+            <img src={u('media/people/p3.jpg')} width="946" height="892" alt="Circular portrait with Happy B-day lettering and star stickers" decoding="async" />
+          </picture>
+          <svg class="spark s1" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d={SPARK}></path></svg>
+          <svg class="spark s2" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d={SPARK}></path></svg>
+          <svg class="spark s3" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d={SPARK}></path></svg>
+        </figure>
+        <div class="msg reveal">
+          <p class="eyebrow">{message.eyebrow}</p>
+          <h1>{message.headingTop} <span class="hl">{message.headingHighlight}</span></h1>
+          {message.paragraphs.map((t) => <p>{t}</p>)}
+          <p class="sign">{message.signoff}</p>
+        </div>
+      </section>
+
+      <section class="sec">
+        <p class="eyebrow reveal">{board.eyebrow}</p>
+        <h2 class="reveal">{board.title}</h2>
+        <div class="board">
+          {photos.map((p) => (
+            <figure class={`pola ${p.cls} reveal`}>
+              <picture>
+                <source srcset={u(`media/people/${p.id}.avif`)} type="image/avif" />
+                <img src={u(`media/people/${p.id}.jpg`)} width={p.w} height={p.h} alt={p.alt} loading="lazy" decoding="async" />
+              </picture>
+              <figcaption>{p.cap}</figcaption>
+            </figure>
+          ))}
+        </div>
+        <div class="cat" data-sticker style={`--w:${CATS.board.w}px; --rot:${CATS.board.rot}deg; ${CATS.board.pos}`}>
+          <img src={u(`media/cats/${CATS.board.id}.webp`)} alt="" loading="lazy" decoding="async" draggable="false" />
+        </div>
+      </section>
+
+      <section class="sec vidwrap">
+        <p class="eyebrow reveal">{video.eyebrow}</p>
+        <h2 class="reveal">{video.title}</h2>
+        <div class="phone reveal">
+          <video playsinline preload="metadata" poster={u('media/people/v1-poster.jpg')}>
+            <source src={u('media/people/v1.mp4')} type="video/mp4" />
+          </video>
+          <button class="play" type="button" aria-label="Play the video with sound">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="rgba(255,255,255,0.22)" stroke="#fff" stroke-width="1.2"></circle><path d="M10 8l6 4-6 4z" fill="#fff"></path></svg>
+            <span>{video.playLabel}</span>
+          </button>
+        </div>
+        <div class="cat" data-sticker style={`--w:${CATS.video.w}px; --rot:${CATS.video.rot}deg; ${CATS.video.pos}`}>
+          <img src={u(`media/cats/${CATS.video.id}.webp`)} alt="" loading="lazy" decoding="async" draggable="false" />
+        </div>
+      </section>
+
+      <section class="sec quote reveal">
+        <p class="q1">{quote.small}</p>
+        <p class="q2">{quote.big}</p>
+        <div class="divider" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d={HEART}></path></svg>
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d={SPARK}></path></svg>
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d={HEART}></path></svg>
+        </div>
+        <div class="cat" data-sticker style={`--w:${CATS.quote.w}px; --rot:${CATS.quote.rot}deg; ${CATS.quote.pos}`}>
+          <img src={u(`media/cats/${CATS.quote.id}.webp`)} alt="" loading="lazy" decoding="async" draggable="false" />
+        </div>
+      </section>
+
+      <section class="sec cakewrap">
+        <p class="eyebrow reveal">{cake.eyebrow}</p>
+        <h2 class="reveal">{cake.title}</h2>
+        <div id="cake-stage" role="img" aria-label="A three-tier birthday cake with five lit candles"></div>
+        <p id="blow-note" class="fine" aria-live="polite" data-initial={cake.instructions} data-done={cake.allOut}>{cake.instructions}</p>
+        <div class="btnrow">
+          <button id="blow-mic" class="btn" type="button">blow with my voice</button>
+          <button id="relight" class="btn ghost" type="button">light them again</button>
+        </div>
+        <p id="wish" aria-live="polite" data-text={cake.wish}></p>
+
+        <div class="cat" data-sticker style={`--w:${CATS.cake.w}px; --rot:${CATS.cake.rot}deg; ${CATS.cake.pos}`}>
+          <img src={u(`media/cats/${CATS.cake.id}.webp`)} alt="" loading="lazy" decoding="async" draggable="false" />
+        </div>
+        <p class="fine">{cake.privacy}</p>
+      </section>
+
+      <footer class="foot">
+        {footer.map((t) => <p>{t}</p>)}
+      </footer>
+
+    </div>
+  </main>
+
+  <dialog class="lb" id="lb" aria-label="Photo"><img alt="" /><button type="button" aria-label="Close" onclick="this.closest('dialog').close()">x</button></dialog>
+
+  <canvas id="petals" aria-hidden="true"></canvas>
+  <div id="hc-layer" aria-hidden="true"></div>
+
+  <script>
+    import '../scripts/main.ts';
+  </script>
+</Base>

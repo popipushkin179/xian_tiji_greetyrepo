@@ -23,3 +23,10 @@ lessons/
 research/
 internal/
 assets/ASSETS.md
+
+
+# --- local tooling ---
+.claude/
+
+# older blog tool snapshots, not part of this site
+assets/

@@ -1,0 +1,129 @@
+/* Heart and flower circles. Global on purpose: every node is created at runtime, so scoped CSS would miss it.
+   Everything is namespaced hc-. Animate transform and opacity only. Add a new one-shot keyframe? Add its name
+   to CLEANUP in src/lib/heartcircles.ts or nodes leak silently. */
+
+#hc-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#hc-layer > div {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+#hc-layer svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hc-flash {
+  border-radius: 50%;
+  background: radial-gradient(circle, currentColor 0%, transparent 68%);
+  opacity: 0;
+  animation: hc-flash 620ms cubic-bezier(0.16, 0.8, 0.24, 1) both;
+}
+
+.hc-glyph {
+  opacity: 0;
+  animation: hc-glyph 1500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hc-glyph svg {
+  filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 12px rgba(236, 120, 170, 0.45));
+}
+.hc-inner svg {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.hc-ring {
+  opacity: 0;
+  animation: hc-ring 950ms cubic-bezier(0.16, 0.8, 0.24, 1) both;
+}
+.hc-ring svg {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.hc-mote {
+  opacity: 0;
+  animation: hc-mote 1300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hc-mote svg {
+  filter: drop-shadow(0 1px 2px rgba(120, 40, 58, 0.28));
+}
+
+/* The rare cast gets its own keyframe: the shared glyph keyframe is brightest while smallest, which would
+   leave the cake a smudge at the moment it should be readable. This one is near full opacity early and holds. */
+.hc-cake {
+  opacity: 0;
+  animation: hc-cake 2700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hc-cake svg {
+  filter: drop-shadow(0 0 1px #fff7fb) drop-shadow(0 0 8px rgba(240, 160, 200, 0.9)) drop-shadow(0 0 24px rgba(247, 231, 176, 0.75));
+}
+.hc-tier {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: hc-rise 520ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.hc-t1 { animation-delay: 60ms; }
+.hc-t2 { animation-delay: 200ms; }
+.hc-t3 { animation-delay: 340ms; }
+.hc-candles { animation: hc-fadein 300ms 520ms both; }
+.hc-topheart { animation: hc-fadein 300ms 700ms both; }
+
+.hc-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: hc-flicker 760ms ease-in-out infinite alternate;
+}
+
+.hc-spin { transform-origin: 60px 60px; transform-box: view-box; animation: hc-rot 7s linear infinite; }
+.hc-spin-rev { transform-origin: 60px 60px; transform-box: view-box; animation: hc-rot 9.5s linear infinite reverse; }
+.hc-spin-slow { transform-origin: 60px 60px; transform-box: view-box; animation: hc-rot 16s linear infinite; }
+
+@keyframes hc-flash {
+  0% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
+}
+@keyframes hc-glyph {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.55) rotate(var(--r0, 0deg)); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(calc(var(--r0, 0deg) * 0.5 + var(--r1, 40deg) * 0.2)); }
+  62% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.12) rotate(var(--r1, 40deg)); }
+}
+@keyframes hc-ring {
+  0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.18); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25); }
+}
+@keyframes hc-mote {
+  0% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(0.4) rotate(0deg); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx, 0), var(--dy, -80px)) scale(1) rotate(var(--tilt, 0deg)); }
+}
+@keyframes hc-cake {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.72); }
+  14% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
+  62% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -54%) scale(1.06); }
+}
+@keyframes hc-rise {
+  0% { opacity: 0; transform: translateY(14px) scaleY(0.7); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+@keyframes hc-fadein { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes hc-flicker {
+  0% { transform: scale(1, 1) skewX(-2deg); }
+  100% { transform: scale(0.94, 1.08) skewX(2.5deg); }
+}
+@keyframes hc-rot { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  #hc-layer { display: none; }
+  .hc-flame, .hc-spin, .hc-spin-rev, .hc-spin-slow { animation: none; }
+}
